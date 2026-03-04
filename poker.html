@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Покер · 2-5 игроков · классика / техасский</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #1e4b2b 0%, #2a6e3a 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .poker-table {
+            max-width: 1200px;
+            width: 100%;
+            background: #0f3b1f;
+            border-radius: 240px 240px 80px 80px;
+            box-shadow: 0 30px 30px rgba(0,0,0,0.6), inset 0 0 0 8px #b48c5c, inset 0 0 20px #ffdd99;
+            padding: 40px 30px;
+            border: 6px solid #c9a87c;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px 25px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 60px;
+            padding: 16px 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #e3c184;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffefcf;
+            font-weight: 600;
+            text-shadow: 2px 2px 0 #1e3b1e;
+        }
+        .control-group select, .control-group button {
+            background: #fbf3e0;
+            border: 3px solid #936e3e;
+            border-radius: 40px;
+            padding: 8px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5a3f24;
+            transition: all 0.07s;
+        }
+        .control-group select:active, .control-group button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #5a3f24;
+        }
+        .control-group button {
+            background: #f5d742;
+            color: #1f471f;
+            letter-spacing: 0.5px;
+            min-width: 110px;
+        }
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .community-cards {
+            background: #1b4d2b;
+            border-radius: 60px;
+            padding: 25px 35px;
+            margin: 10px 0 25px 0;
+            border: 3px dashed #ebc28b;
+            box-shadow: inset 0 0 0 4px #282113;
+        }
+        .cards-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        .card {
+            width: 80px;
+            height: 112px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 0 #631010, 0 4px 10px black;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px 5px;
+            font-weight: 800;
+            font-size: 1.7rem;
+            position: relative;
+            border: 2px solid #f9e3b3;
+        }
+        .card[data-suit="♥"], .card[data-suit="♦"] {
+            color: #c03030;
+        }
+        .card[data-suit="♣"], .card[data-suit="♠"] {
+            color: #1a1a1a;
+        }
+        .card .top-left {
+            align-self: flex-start;
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+        .card .bottom-right {
+            align-self: flex-end;
+            font-size: 1.3rem;
+            transform: rotate(180deg);
+        }
+        .card .big-suit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            opacity: 0.7;
+        }
+        .players-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px 35px;
+            margin-top: 20px;
+        }
+        .player-spot {
+            background: #1a411f;
+            border-radius: 50px 50px 30px 30px;
+            padding: 18px 10px 12px 10px;
+            min-width: 160px;
+            text-align: center;
+            border: 3px solid #c7a15e;
+            box-shadow: 0 10px 0 #0c2b14, inset 0 2px 10px #a6d49f;
+            color: #f9eec1;
+        }
+        .player-name {
+            font-weight: bold;
+            background: #322011;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 40px;
+            margin-top: -35px;
+            margin-bottom: 10px;
+            border: 2px solid #efc58b;
+            font-size: 1.2rem;
+        }
+        .hole-cards {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 10px 0;
+            min-height: 70px;
+        }
+        .hole-cards .card {
+            width: 55px;
+            height: 77px;
+            font-size: 1.2rem;
+        }
+        .hole-cards .card .big-suit {
+            font-size: 2rem;
+        }
+        .player-status {
+            font-size: 0.9rem;
+            background: #2d251a;
+            padding: 5px;
+            border-radius: 30px;
+        }
+        .winner-msg {
+            background: #f5cf7b;
+            color: #1c431c;
+            font-weight: bold;
+            padding: 14px 30px;
+            border-radius: 40px;
+            margin: 20px 0 0;
+            font-size: 1.5rem;
+            border: 3px solid gold;
+            text-shadow: 1px 1px 0 white;
+            display: inline-block;
+        }
+        .pot-area {
+            background: #0f1e12;
+            border-radius: 40px;
+            padding: 6px 35px;
+            color: #ffeeaa;
+            font-weight: bold;
+            font-size: 1.4rem;
+            border: 2px solid #f1cf8b;
+            margin-top: 5px;
+        }
+        .empty-card {
+            width: 55px;
+            height: 77px;
+            background: #203b25;
+            border-radius: 10px;
+            border: 2px dashed #9b8c6b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6f8a72;
+            font-size: 1.8rem;
+            box-shadow: inset 0 0 10px #1f1f0f;
+        }
+        .slot-machine {
+            background: #32281b;
+            border-radius: 80px 80px 40px 40px;
+            padding: 30px 20px 35px;
+            border: 5px solid #af8747;
+            box-shadow: inset 0 -8px 0 #6c4e29, 0 12px 0 #112211;
+            margin-bottom: 25px;
+        }
+        .spin-btn {
+            background: #d42828;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 9px 0 #631111, 0 10px 20px black;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border: 3px solid #ffac7b;
+            transition: 0.07s;
+        }
+        footer {
+            color: #ebdbaa;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="poker-table">
+    <div class="controls">
+        <div class="control-group">
+            <span>👥 Игроков:</span>
+            <select id="playerCountSelect">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <span>🎲 Режим:</span>
+            <select id="gameTypeSelect">
+                <option value="classic">Классический (5‑карточный)</option>
+                <option value="texas" selected>Техасский Холдем</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <button id="dealBtn">♻️ Сдать заново</button>
+        </div>
+        <div class="slot-machine">
+        <a href="index.html" class="spin-btn">
+                Главная
+        </a>
+        </div>
+    </div>
+
+    <div class="game-area">
+        <!-- общие карты -->
+        <div class="community-cards" id="communityArea">
+            <div class="cards-row" id="communityRow">
+                <!-- сюда рендерятся общие карты -->
+            </div>
+            <div class="pot-area" id="potDisplay">💰 Банк: 0</div>
+        </div>
+
+        <!-- игроки -->
+        <div class="players-grid" id="playersGrid"></div>
+
+        <!-- победитель -->
+        <div id="winnerMessage" class="winner-msg" style="min-width: 300px;"></div>
+    </div>
+    <footer>♠ ♥ ♣ ♦   выбери состав и стиль — нажми "сдать"</footer>
+</div>
+
+<script>
+    (function() {
+        // ---------- константы и масти ----------
+        const SUITS = ['♠', '♥', '♦', '♣'];
+        const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+
+        // ---------- состояние ----------
+        let players = [];                     // массив объектов игроков
+        let communityCards = [];               // общие карты (для техаса 5, для классики 0)
+        let pot = 0;
+        let gameType = 'texas';                 // 'texas' или 'classic'
+        let playerCount = 3;
+
+        // DOM элементы
+        const playerCountSelect = document.getElementById('playerCountSelect');
+        const gameTypeSelect = document.getElementById('gameTypeSelect');
+        const dealBtn = document.getElementById('dealBtn');
+        const playersGrid = document.getElementById('playersGrid');
+        const communityRow = document.getElementById('communityRow');
+        const potDisplay = document.getElementById('potDisplay');
+        const winnerMessageDiv = document.getElementById('winnerMessage');
+
+        // ---------- вспомогательные функции ----------
+        function createDeck() {
+            const deck = [];
+            for (let s of SUITS) {
+                for (let r of RANKS) {
+                    deck.push({ rank: r, suit: s });
+                }
+            }
+            return shuffle(deck);
+        }
+
+        function shuffle(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        // начальная раздача в зависимости от gameType
+        function dealNewGame() {
+            const deck = createDeck();
+            const count = playerCount;
+            players = [];
+            communityCards = [];
+
+            // Создаём игроков (пустые руки)
+            for (let i = 0; i < count; i++) {
+                players.push({
+                    id: i,
+                    name: `Игрок ${i+1}`,
+                    hole: [],          // две карты для техаса / 5 для классики
+                    isActive: true,
+                });
+            }
+
+            if (gameType === 'texas') {
+                // Техасский холдем: по 2 карты на руки, 5 общих
+                // сдаём по 2 каждому
+                for (let i = 0; i < 2; i++) {
+                    for (let p of players) {
+                        if (deck.length) p.hole.push(deck.pop());
+                    }
+                }
+                // 5 общих
+                for (let i = 0; i < 5; i++) {
+                    if (deck.length) communityCards.push(deck.pop());
+                }
+            } else { 
+                // Классический (пятикарточный) — общих карт нет, каждому по 5 карт
+                for (let i = 0; i < 5; i++) {
+                    for (let p of players) {
+                        if (deck.length) p.hole.push(deck.pop());
+                    }
+                }
+                communityCards = []; // нет общих
+            }
+
+            // Исправлено: убрана лишняя * 2 и точка с запятой
+            pot = 100 + Math.floor(Math.random() * 150); // случайный банк для красоты
+            updateUI();
+        }
+
+        // ---------- определение победителя (упрощённая логика для демо) ----------
+        function evaluateHand(hand) {
+            // Исправлено: проверка на пустую руку
+            if (!hand || hand.length === 0) return 0;
+            
+            let rankMap = new Map();
+            let suitMap = new Map();
+            let totalScore = 0;
+
+            for (let card of hand) {
+                // Исправлено: проверка на существование карты
+                if (!card) continue;
+                
+                let r = card.rank;
+                let points = RANKS.indexOf(r) + 2; // 2..14
+                totalScore += points;
+
+                rankMap.set(r, (rankMap.get(r) || 0) + 1);
+                suitMap.set(card.suit, (suitMap.get(card.suit) || 0) + 1);
+            }
+
+            // бонус за пару/сет и т.п.
+            let pairBonus = 0;
+            for (let [rank, cnt] of rankMap.entries()) {
+                if (cnt === 2) pairBonus += 20 * (RANKS.indexOf(rank) + 2);
+                if (cnt === 3) pairBonus += 100 * (RANKS.indexOf(rank) + 2);
+                if (cnt === 4) pairBonus += 500 * (RANKS.indexOf(rank) + 2);
+            }
+
+            // бонус за флеш
+            let flushBonus = 0;
+            for (let cnt of suitMap.values()) {
+                if (cnt >= 5) flushBonus = 800;
+            }
+
+            return totalScore + pairBonus + flushBonus;
+        }
+
+        function determineWinner() {
+            if (!players || players.length === 0) return null;
+
+            if (gameType === 'texas' && communityCards.length === 5) {
+                let bestScore = -1;
+                let winners = [];
+
+                for (let p of players) {
+                    if (!p.isActive) continue;
+                    // Исправлено: проверка на наличие карт
+                    if (!p.hole || p.hole.length < 2) continue;
+                    
+                    let sevenCards = [...p.hole, ...communityCards].filter(card => card != null);
+                    let rawScore = evaluateHand(sevenCards);
+                    
+                    if (rawScore > bestScore) {
+                        bestScore = rawScore;
+                        winners = [p];
+                    } else if (rawScore === bestScore && rawScore > -1) {
+                        winners.push(p);
+                    }
+                }
+                return winners;
+            } 
+            else { // classic
+                let bestScore = -1;
+                let winners = [];
+                for (let p of players) {
+                    if (!p.isActive) continue;
+                    if (!p.hole || p.hole.length === 0) continue;
+                    
+                    let score = evaluateHand(p.hole);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        winners = [p];
+                    } else if (score === bestScore && score > -1) {
+                        winners.push(p);
+                    }
+                }
+                return winners;
+            }
+        }
+
+        // ---------- отрисовка UI ----------
+        function renderCard(card) {
+            if (!card) return '<div class="empty-card">🃏</div>';
+            return `
+                <div class="card" data-suit="${card.suit}">
+                    <div class="top-left">${card.rank}</div>
+                    <div class="big-suit">${card.suit}</div>
+                    <div class="bottom-right">${card.rank}</div>
+                </div>
+            `;
+        }
+
+        function updateUI() {
+            // отобразить общие карты
+            let communityHtml = '';
+            if (gameType === 'texas') {
+                if (communityCards && communityCards.length === 5) {
+                    communityCards.forEach(c => { 
+                        communityHtml += renderCard(c); 
+                    });
+                } else {
+                    for (let i = 0; i < 5; i++) {
+                        communityHtml += '<div class="empty-card">🃏</div>';
+                    }
+                }
+            } else {
+                communityHtml = '<div style="color:#ecd89e; font-style:italic; padding:0 20px;">— без общих карт —</div>';
+            }
+            communityRow.innerHTML = communityHtml;
+
+            potDisplay.innerText = `💰 Банк: ${pot}`;
+
+            // отрисовать игроков
+            let playersHtml = '';
+            for (let p of players) {
+                let holeHtml = '';
+                if (gameType === 'texas') {
+                    if (p.hole && p.hole.length === 2) {
+                        holeHtml += renderCard(p.hole[0]);
+                        holeHtml += renderCard(p.hole[1]);
+                    } else {
+                        holeHtml += '<div class="empty-card">?</div><div class="empty-card">?</div>';
+                    }
+                } else {
+                    if (p.hole && p.hole.length === 5) {
+                        p.hole.forEach(c => { 
+                            holeHtml += renderCard(c); 
+                        });
+                    } else {
+                        for (let i = 0; i < 5; i++) {
+                            holeHtml += '<div class="empty-card">?</div>';
+                        }
+                    }
+                }
+
+                playersHtml += `
+                    <div class="player-spot">
+                        <div class="player-name">${p.name}</div>
+                        <div class="hole-cards">${holeHtml}</div>
+                        <div class="player-status">💰 ${Math.floor(pot/players.length)} фишек</div>
+                    </div>
+                `;
+            }
+            playersGrid.innerHTML = playersHtml;
+
+            // победитель
+            const winnerList = determineWinner();
+            if (winnerList && winnerList.length > 0) {
+                let names = winnerList.map(w => w.name).join(' и ');
+                if (winnerList.length === 1) {
+                    winnerMessageDiv.innerText = `🏆 Победитель: ${names} 🏆`;
+                } else {
+                    winnerMessageDiv.innerText = `🤝 Ничья: ${names} разделяют банк`;
+                }
+            } else {
+                winnerMessageDiv.innerText = '✨ Раздайте карты ✨';
+            }
+        }
+
+        // ---------- обработчики изменений ----------
+        function updateSettingsAndDeal() {
+            playerCount = parseInt(playerCountSelect.value, 10);
+            gameType = gameTypeSelect.value;
+            dealNewGame();
+        }
+
+        // инициализация + слушатели
+        playerCountSelect.addEventListener('change', updateSettingsAndDeal);
+        gameTypeSelect.addEventListener('change', updateSettingsAndDeal);
+        dealBtn.addEventListener('click', updateSettingsAndDeal);
+
+        // старт
+        updateSettingsAndDeal();
+    })();
+</script>
+</body>
+</html>
