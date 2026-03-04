@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Покер · 2-5 игроков · классика / техасский</title>
+    <title>Покер · P2P мультиплеер без сервера</title>
     <style>
         * {
             box-sizing: border-box;
@@ -19,7 +19,7 @@
             padding: 16px;
         }
         .poker-table {
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
             background: #0f3b1f;
             border-radius: 240px 240px 80px 80px;
@@ -27,17 +27,84 @@
             padding: 40px 30px;
             border: 6px solid #c9a87c;
         }
+        .connection-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px 25px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 60px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #e3c184;
+        }
+        .peer-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            background: #2a4d2a;
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid #c9a87c;
+        }
+        .peer-section input, .peer-section button {
+            background: #fbf3e0;
+            border: 3px solid #936e3e;
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5a3f24;
+            transition: all 0.07s;
+        }
+        .peer-section input {
+            width: 250px;
+            cursor: text;
+        }
+        .peer-section button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #5a3f24;
+        }
+        .my-id {
+            background: #f5d742;
+            color: #1f471f;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid #b48c2c;
+        }
+        .players-online {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #1f3f2a;
+            border-radius: 50px;
+        }
+        .peer-badge {
+            background: #3d6b4a;
+            padding: 6px 18px;
+            border-radius: 30px;
+            color: #ffefcf;
+            font-weight: bold;
+            border: 2px solid #e3b87c;
+        }
         .controls {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 15px 25px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.2);
             border-radius: 60px;
             padding: 16px 25px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(4px);
-            border: 1px solid #e3c184;
+            margin: 20px 0;
         }
         .control-group {
             display: flex;
@@ -56,17 +123,6 @@
             font-size: 1rem;
             cursor: pointer;
             box-shadow: 0 4px 0 #5a3f24;
-            transition: all 0.07s;
-        }
-        .control-group select:active, .control-group button:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #5a3f24;
-        }
-        .control-group button {
-            background: #f5d742;
-            color: #1f471f;
-            letter-spacing: 0.5px;
-            min-width: 110px;
         }
         .game-area {
             display: flex;
@@ -79,7 +135,6 @@
             padding: 25px 35px;
             margin: 10px 0 25px 0;
             border: 3px dashed #ebc28b;
-            box-shadow: inset 0 0 0 4px #282113;
         }
         .cards-row {
             display: flex;
@@ -102,26 +157,13 @@
             position: relative;
             border: 2px solid #f9e3b3;
         }
-        .card[data-suit="♥"], .card[data-suit="♦"] {
-            color: #c03030;
-        }
-        .card[data-suit="♣"], .card[data-suit="♠"] {
-            color: #1a1a1a;
-        }
-        .card .top-left {
-            align-self: flex-start;
-            font-size: 1.3rem;
-            line-height: 1;
-        }
-        .card .bottom-right {
-            align-self: flex-end;
-            font-size: 1.3rem;
-            transform: rotate(180deg);
-        }
+        .card[data-suit="♥"], .card[data-suit="♦"] { color: #c03030; }
+        .card[data-suit="♣"], .card[data-suit="♠"] { color: #1a1a1a; }
+        .card .top-left { align-self: flex-start; font-size: 1.3rem; }
+        .card .bottom-right { align-self: flex-end; font-size: 1.3rem; transform: rotate(180deg); }
         .card .big-suit {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             font-size: 3rem;
             opacity: 0.7;
@@ -137,10 +179,10 @@
             background: #1a411f;
             border-radius: 50px 50px 30px 30px;
             padding: 18px 10px 12px 10px;
-            min-width: 160px;
+            min-width: 180px;
             text-align: center;
             border: 3px solid #c7a15e;
-            box-shadow: 0 10px 0 #0c2b14, inset 0 2px 10px #a6d49f;
+            box-shadow: 0 10px 0 #0c2b14;
             color: #f9eec1;
         }
         .player-name {
@@ -152,7 +194,6 @@
             margin-top: -35px;
             margin-bottom: 10px;
             border: 2px solid #efc58b;
-            font-size: 1.2rem;
         }
         .hole-cards {
             display: flex;
@@ -162,12 +203,7 @@
             min-height: 70px;
         }
         .hole-cards .card {
-            width: 55px;
-            height: 77px;
-            font-size: 1.2rem;
-        }
-        .hole-cards .card .big-suit {
-            font-size: 2rem;
+            width: 55px; height: 77px; font-size: 1.2rem;
         }
         .player-status {
             font-size: 0.9rem;
@@ -184,7 +220,6 @@
             margin: 20px 0 0;
             font-size: 1.5rem;
             border: 3px solid gold;
-            text-shadow: 1px 1px 0 white;
             display: inline-block;
         }
         .pot-area {
@@ -198,8 +233,7 @@
             margin-top: 5px;
         }
         .empty-card {
-            width: 55px;
-            height: 77px;
+            width: 55px; height: 77px;
             background: #203b25;
             border-radius: 10px;
             border: 2px dashed #9b8c6b;
@@ -208,7 +242,22 @@
             justify-content: center;
             color: #6f8a72;
             font-size: 1.8rem;
-            box-shadow: inset 0 0 10px #1f1f0f;
+        }
+        .hidden { display: none; }
+        .action-btn {
+            background: #ffd966;
+            border: 2px solid #936e3e;
+            border-radius: 30px;
+            padding: 6px 15px;
+            margin: 3px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .host-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
         .slot-machine {
             background: #32281b;
@@ -233,19 +282,39 @@
             border: 3px solid #ffac7b;
             transition: 0.07s;
         }
-        footer {
-            color: #ebdbaa;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            text-align: center;
-        }
     </style>
+    <!-- PeerJS для P2P соединения -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
 <div class="poker-table">
-    <div class="controls">
+    <!-- Панель подключения -->
+    <div class="connection-panel">
+        <div class="peer-section">
+            <span>🎯 Мой ID:</span>
+            <span class="my-id" id="myPeerId">(создание...)</span>
+            <button id="copyIdBtn">📋 Копировать</button>
+        </div>
+        <div class="peer-section">
+            <input type="text" id="peerIdInput" placeholder="ID друга для подключения">
+            <button id="connectBtn">🔗 Подключиться</button>
+        </div>
+        <div class="slot-machine">
+            <a href="index.html" class="spin-btn">
+                Главная
+            </a>
+        </div>
+    </div>
+
+    <!-- Список подключенных игроков -->
+    <div class="players-online" id="onlinePlayers">
+        <span class="peer-badge">👤 Вы (хост)</span>
+    </div>
+
+    <!-- Настройки игры (видит только хост) -->
+    <div id="hostSettings" class="controls">
         <div class="control-group">
-            <span>👥 Игроков:</span>
+            <span>👥 Игроков (всего):</span>
             <select id="playerCountSelect">
                 <option value="2">2</option>
                 <option value="3" selected>3</option>
@@ -256,298 +325,440 @@
         <div class="control-group">
             <span>🎲 Режим:</span>
             <select id="gameTypeSelect">
-                <option value="classic">Классический (5‑карточный)</option>
+                <option value="classic">Классический (5 карт)</option>
                 <option value="texas" selected>Техасский Холдем</option>
             </select>
         </div>
         <div class="control-group">
-            <button id="dealBtn">♻️ Сдать заново</button>
-        </div>
-        <div class="slot-machine">
-        <a href="index.html" class="spin-btn">
-                Главная
-        </a>
+            <button id="startGameBtn">🎮 Начать игру</button>
         </div>
     </div>
 
     <div class="game-area">
-        <!-- общие карты -->
-        <div class="community-cards" id="communityArea">
-            <div class="cards-row" id="communityRow">
-                <!-- сюда рендерятся общие карты -->
-            </div>
+        <div class="community-cards">
+            <div class="cards-row" id="communityRow"></div>
             <div class="pot-area" id="potDisplay">💰 Банк: 0</div>
         </div>
 
-        <!-- игроки -->
         <div class="players-grid" id="playersGrid"></div>
-
-        <!-- победитель -->
-        <div id="winnerMessage" class="winner-msg" style="min-width: 300px;"></div>
+        <div id="winnerMessage" class="winner-msg"></div>
+        
+        <!-- Кнопки действий (для всех) -->
+        <div class="host-controls" id="actionButtons" style="display: none;">
+            <button class="action-btn" id="foldBtn">❌ Fold</button>
+            <button class="action-btn" id="checkCallBtn">✅ Check/Call</button>
+            <button class="action-btn" id="raiseBtn">📈 Raise</button>
+        </div>
     </div>
-    <footer>♠ ♥ ♣ ♦   выбери состав и стиль — нажми "сдать"</footer>
 </div>
 
 <script>
-    (function() {
-        // ---------- константы и масти ----------
-        const SUITS = ['♠', '♥', '♦', '♣'];
-        const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+(function() {
+    // ---------- Константы и настройки ----------
+    const SUITS = ['♠', '♥', '♦', '♣'];
+    const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+    
+    // Состояние игры
+    let gameState = {
+        players: [],           // массив игроков { id, name, hole, chips, isActive }
+        communityCards: [],
+        pot: 0,
+        gameType: 'texas',
+        currentTurn: 0,        // индекс текущего игрока
+        bettingRound: 'preflop', // preflop, flop, turn, river
+        dealerPos: 0,
+        winner: null
+    };
 
-        // ---------- состояние ----------
-        let players = [];                     // массив объектов игроков
-        let communityCards = [];               // общие карты (для техаса 5, для классики 0)
-        let pot = 0;
-        let gameType = 'texas';                 // 'texas' или 'classic'
-        let playerCount = 3;
+    // P2P переменные
+    let peer = null;
+    let connections = [];      // все подключения (кроме себя)
+    let myId = null;
+    let amIHost = true;        // первый создатель - хост
+    let hostId = null;         // ID хоста
+    let playerName = 'Игрок_' + Math.floor(Math.random()*1000);
 
-        // DOM элементы
-        const playerCountSelect = document.getElementById('playerCountSelect');
-        const gameTypeSelect = document.getElementById('gameTypeSelect');
-        const dealBtn = document.getElementById('dealBtn');
-        const playersGrid = document.getElementById('playersGrid');
-        const communityRow = document.getElementById('communityRow');
-        const potDisplay = document.getElementById('potDisplay');
-        const winnerMessageDiv = document.getElementById('winnerMessage');
+    // DOM элементы
+    const myPeerIdSpan = document.getElementById('myPeerId');
+    const copyIdBtn = document.getElementById('copyIdBtn');
+    const peerIdInput = document.getElementById('peerIdInput');
+    const connectBtn = document.getElementById('connectBtn');
+    const onlinePlayersDiv = document.getElementById('onlinePlayers');
+    const hostSettings = document.getElementById('hostSettings');
+    const playerCountSelect = document.getElementById('playerCountSelect');
+    const gameTypeSelect = document.getElementById('gameTypeSelect');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const communityRow = document.getElementById('communityRow');
+    const potDisplay = document.getElementById('potDisplay');
+    const playersGrid = document.getElementById('playersGrid');
+    const winnerMessageDiv = document.getElementById('winnerMessage');
+    const actionButtons = document.getElementById('actionButtons');
+    const foldBtn = document.getElementById('foldBtn');
+    const checkCallBtn = document.getElementById('checkCallBtn');
+    const raiseBtn = document.getElementById('raiseBtn');
 
-        // ---------- вспомогательные функции ----------
-        function createDeck() {
-            const deck = [];
-            for (let s of SUITS) {
-                for (let r of RANKS) {
-                    deck.push({ rank: r, suit: s });
-                }
-            }
-            return shuffle(deck);
-        }
+    // ---------- Инициализация PeerJS ----------
+    function initPeer() {
+        peer = new Peer({
+            // Используем бесплатный сервер PeerJS Cloud
+            config: {'iceServers': [
+                { url: 'stun:stun.l.google.com:19302' }
+            ]}
+        });
 
-        function shuffle(deck) {
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
-            return deck;
-        }
+        peer.on('open', (id) => {
+            myId = id;
+            myPeerIdSpan.innerText = id;
+            hostId = id;  // первый - хост
+            updateOnlinePlayers();
+        });
 
-        // начальная раздача в зависимости от gameType
-        function dealNewGame() {
-            const deck = createDeck();
-            const count = playerCount;
-            players = [];
-            communityCards = [];
-
-            // Создаём игроков (пустые руки)
-            for (let i = 0; i < count; i++) {
-                players.push({
-                    id: i,
-                    name: `Игрок ${i+1}`,
-                    hole: [],          // две карты для техаса / 5 для классики
-                    isActive: true,
-                });
-            }
-
-            if (gameType === 'texas') {
-                // Техасский холдем: по 2 карты на руки, 5 общих
-                // сдаём по 2 каждому
-                for (let i = 0; i < 2; i++) {
-                    for (let p of players) {
-                        if (deck.length) p.hole.push(deck.pop());
-                    }
-                }
-                // 5 общих
-                for (let i = 0; i < 5; i++) {
-                    if (deck.length) communityCards.push(deck.pop());
-                }
-            } else { 
-                // Классический (пятикарточный) — общих карт нет, каждому по 5 карт
-                for (let i = 0; i < 5; i++) {
-                    for (let p of players) {
-                        if (deck.length) p.hole.push(deck.pop());
-                    }
-                }
-                communityCards = []; // нет общих
-            }
-
-            // Исправлено: убрана лишняя * 2 и точка с запятой
-            pot = 100 + Math.floor(Math.random() * 150); // случайный банк для красоты
-            updateUI();
-        }
-
-        // ---------- определение победителя (упрощённая логика для демо) ----------
-        function evaluateHand(hand) {
-            // Исправлено: проверка на пустую руку
-            if (!hand || hand.length === 0) return 0;
-            
-            let rankMap = new Map();
-            let suitMap = new Map();
-            let totalScore = 0;
-
-            for (let card of hand) {
-                // Исправлено: проверка на существование карты
-                if (!card) continue;
+        peer.on('connection', (conn) => {
+            conn.on('open', () => {
+                connections.push(conn);
+                setupConnection(conn);
                 
-                let r = card.rank;
-                let points = RANKS.indexOf(r) + 2; // 2..14
-                totalScore += points;
+                // Отправляем текущее состояние новому игроку
+                conn.send({
+                    type: 'init',
+                    amIHost: false,
+                    hostId: hostId,
+                    gameState: gameState,
+                    playersList: connections.map(c => c.peer)
+                });
+                
+                updateOnlinePlayers();
+            });
+        });
+    }
 
-                rankMap.set(r, (rankMap.get(r) || 0) + 1);
-                suitMap.set(card.suit, (suitMap.get(card.suit) || 0) + 1);
-            }
+    function setupConnection(conn) {
+        conn.on('data', (data) => {
+            handleMessage(data, conn);
+        });
+        
+        conn.on('close', () => {
+            connections = connections.filter(c => c.peer !== conn.peer);
+            updateOnlinePlayers();
+        });
+    }
 
-            // бонус за пару/сет и т.п.
-            let pairBonus = 0;
-            for (let [rank, cnt] of rankMap.entries()) {
-                if (cnt === 2) pairBonus += 20 * (RANKS.indexOf(rank) + 2);
-                if (cnt === 3) pairBonus += 100 * (RANKS.indexOf(rank) + 2);
-                if (cnt === 4) pairBonus += 500 * (RANKS.indexOf(rank) + 2);
-            }
-
-            // бонус за флеш
-            let flushBonus = 0;
-            for (let cnt of suitMap.values()) {
-                if (cnt >= 5) flushBonus = 800;
-            }
-
-            return totalScore + pairBonus + flushBonus;
+    // ---------- Обработка сообщений ----------
+    function handleMessage(data, conn) {
+        switch(data.type) {
+            case 'init':
+                amIHost = data.amIHost;
+                hostId = data.hostId;
+                if (data.gameState) gameState = data.gameState;
+                updateUI();
+                break;
+                
+            case 'gameState':
+                gameState = data.gameState;
+                updateUI();
+                break;
+                
+            case 'startGame':
+                gameState = data.gameState;
+                updateUI();
+                break;
+                
+            case 'playerAction':
+                // Обновляем действие игрока
+                if (data.action) {
+                    applyPlayerAction(data.playerId, data.action, data.bet);
+                }
+                break;
         }
+    }
 
-        function determineWinner() {
-            if (!players || players.length === 0) return null;
-
-            if (gameType === 'texas' && communityCards.length === 5) {
-                let bestScore = -1;
-                let winners = [];
-
-                for (let p of players) {
-                    if (!p.isActive) continue;
-                    // Исправлено: проверка на наличие карт
-                    if (!p.hole || p.hole.length < 2) continue;
-                    
-                    let sevenCards = [...p.hole, ...communityCards].filter(card => card != null);
-                    let rawScore = evaluateHand(sevenCards);
-                    
-                    if (rawScore > bestScore) {
-                        bestScore = rawScore;
-                        winners = [p];
-                    } else if (rawScore === bestScore && rawScore > -1) {
-                        winners.push(p);
-                    }
-                }
-                return winners;
-            } 
-            else { // classic
-                let bestScore = -1;
-                let winners = [];
-                for (let p of players) {
-                    if (!p.isActive) continue;
-                    if (!p.hole || p.hole.length === 0) continue;
-                    
-                    let score = evaluateHand(p.hole);
-                    if (score > bestScore) {
-                        bestScore = score;
-                        winners = [p];
-                    } else if (score === bestScore && score > -1) {
-                        winners.push(p);
-                    }
-                }
-                return winners;
+    // ---------- Функции игры ----------
+    function createDeck() {
+        const deck = [];
+        for (let s of SUITS) {
+            for (let r of RANKS) {
+                deck.push({ rank: r, suit: s });
             }
         }
+        return shuffle(deck);
+    }
 
-        // ---------- отрисовка UI ----------
-        function renderCard(card) {
-            if (!card) return '<div class="empty-card">🃏</div>';
-            return `
-                <div class="card" data-suit="${card.suit}">
-                    <div class="top-left">${card.rank}</div>
-                    <div class="big-suit">${card.suit}</div>
-                    <div class="bottom-right">${card.rank}</div>
+    function shuffle(deck) {
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
+    }
+
+    function startNewGame() {
+        const deck = createDeck();
+        const totalPlayers = parseInt(playerCountSelect.value);
+        
+        // Создаем игроков
+        gameState.players = [];
+        for (let i = 0; i < totalPlayers; i++) {
+            gameState.players.push({
+                id: i,
+                name: `Игрок ${i+1}`,
+                hole: [],
+                chips: 1000,
+                isActive: true,
+                isFolded: false,
+                currentBet: 0
+            });
+        }
+        
+        gameState.communityCards = [];
+        gameState.pot = 0;
+        gameState.gameType = gameTypeSelect.value;
+        
+        // Раздача
+        if (gameState.gameType === 'texas') {
+            for (let i = 0; i < 2; i++) {
+                for (let p of gameState.players) {
+                    if (deck.length) p.hole.push(deck.pop());
+                }
+            }
+            for (let i = 0; i < 5; i++) {
+                if (deck.length) gameState.communityCards.push(deck.pop());
+            }
+        } else {
+            for (let i = 0; i < 5; i++) {
+                for (let p of gameState.players) {
+                    if (deck.length) p.hole.push(deck.pop());
+                }
+            }
+        }
+        
+        gameState.pot = 100 + Math.floor(Math.random() * 200);
+        
+        // Отправляем всем новое состояние
+        broadcastGameState();
+        updateUI();
+    }
+
+    function broadcastGameState() {
+        const message = {
+            type: 'gameState',
+            gameState: gameState
+        };
+        connections.forEach(conn => conn.send(message));
+    }
+
+    // ---------- Оценка руки (упрощенная) ----------
+    function evaluateHand(hand) {
+        if (!hand || hand.length === 0) return 0;
+        
+        let rankMap = new Map();
+        let suitMap = new Map();
+        let totalScore = 0;
+
+        for (let card of hand) {
+            if (!card) continue;
+            let points = RANKS.indexOf(card.rank) + 2;
+            totalScore += points;
+            rankMap.set(card.rank, (rankMap.get(card.rank) || 0) + 1);
+            suitMap.set(card.suit, (suitMap.get(card.suit) || 0) + 1);
+        }
+
+        let pairBonus = 0;
+        for (let [rank, cnt] of rankMap.entries()) {
+            if (cnt === 2) pairBonus += 20 * (RANKS.indexOf(rank) + 2);
+            if (cnt === 3) pairBonus += 100 * (RANKS.indexOf(rank) + 2);
+            if (cnt === 4) pairBonus += 500 * (RANKS.indexOf(rank) + 2);
+        }
+
+        let flushBonus = 0;
+        for (let cnt of suitMap.values()) {
+            if (cnt >= 5) flushBonus = 800;
+        }
+
+        return totalScore + pairBonus + flushBonus;
+    }
+
+    function determineWinner() {
+        if (!gameState.players || gameState.players.length === 0) return null;
+        
+        let bestScore = -1;
+        let winners = [];
+
+        for (let p of gameState.players) {
+            if (!p.isActive || p.isFolded) continue;
+            
+            let cards = [];
+            if (gameState.gameType === 'texas') {
+                cards = [...p.hole, ...gameState.communityCards].filter(c => c);
+            } else {
+                cards = p.hole.filter(c => c);
+            }
+            
+            let score = evaluateHand(cards);
+            if (score > bestScore) {
+                bestScore = score;
+                winners = [p];
+            } else if (score === bestScore && score > -1) {
+                winners.push(p);
+            }
+        }
+        return winners;
+    }
+
+    // ---------- UI обновление ----------
+    function renderCard(card) {
+        if (!card) return '<div class="empty-card">🃏</div>';
+        return `
+            <div class="card" data-suit="${card.suit}">
+                <div class="top-left">${card.rank}</div>
+                <div class="big-suit">${card.suit}</div>
+                <div class="bottom-right">${card.rank}</div>
+            </div>
+        `;
+    }
+
+    function updateOnlinePlayers() {
+        let html = `<span class="peer-badge">👤 Вы (${amIHost ? 'хост' : 'игрок'})</span>`;
+        connections.forEach(conn => {
+            html += `<span class="peer-badge">🔗 Peer: ${conn.peer.substr(0,6)}</span>`;
+        });
+        onlinePlayersDiv.innerHTML = html;
+        
+        // Показываем настройки только хосту
+        if (amIHost) {
+            hostSettings.style.display = 'flex';
+        } else {
+            hostSettings.style.display = 'none';
+        }
+    }
+
+    function updateUI() {
+        // Общие карты
+        let communityHtml = '';
+        if (gameState.gameType === 'texas') {
+            if (gameState.communityCards && gameState.communityCards.length) {
+                gameState.communityCards.forEach(c => { 
+                    communityHtml += renderCard(c); 
+                });
+            } else {
+                for (let i = 0; i < 5; i++) communityHtml += '<div class="empty-card">🃏</div>';
+            }
+        } else {
+            communityHtml = '<div style="color:#ecd89e;">— без общих карт —</div>';
+        }
+        communityRow.innerHTML = communityHtml;
+        potDisplay.innerText = `💰 Банк: ${gameState.pot}`;
+
+        // Игроки
+        let playersHtml = '';
+        for (let p of gameState.players) {
+            let holeHtml = '';
+            if (gameState.gameType === 'texas') {
+                if (p.hole && p.hole.length) {
+                    p.hole.forEach(c => holeHtml += renderCard(c));
+                } else {
+                    holeHtml += '<div class="empty-card">?</div><div class="empty-card">?</div>';
+                }
+            } else {
+                if (p.hole && p.hole.length) {
+                    p.hole.forEach(c => holeHtml += renderCard(c));
+                } else {
+                    for (let i = 0; i < 5; i++) holeHtml += '<div class="empty-card">?</div>';
+                }
+            }
+
+            playersHtml += `
+                <div class="player-spot">
+                    <div class="player-name">${p.name}</div>
+                    <div class="hole-cards">${holeHtml}</div>
+                    <div class="player-status">💰 ${p.chips} ${p.isFolded ? '(пас)' : ''}</div>
                 </div>
             `;
         }
+        playersGrid.innerHTML = playersHtml;
 
-        function updateUI() {
-            // отобразить общие карты
-            let communityHtml = '';
-            if (gameType === 'texas') {
-                if (communityCards && communityCards.length === 5) {
-                    communityCards.forEach(c => { 
-                        communityHtml += renderCard(c); 
-                    });
-                } else {
-                    for (let i = 0; i < 5; i++) {
-                        communityHtml += '<div class="empty-card">🃏</div>';
-                    }
-                }
+        // Победитель
+        const winners = determineWinner();
+        if (winners && winners.length > 0) {
+            let names = winners.map(w => w.name).join(' и ');
+            if (winners.length === 1) {
+                winnerMessageDiv.innerText = `🏆 Победитель: ${names} 🏆`;
             } else {
-                communityHtml = '<div style="color:#ecd89e; font-style:italic; padding:0 20px;">— без общих карт —</div>';
+                winnerMessageDiv.innerText = `🤝 Ничья: ${names}`;
             }
-            communityRow.innerHTML = communityHtml;
-
-            potDisplay.innerText = `💰 Банк: ${pot}`;
-
-            // отрисовать игроков
-            let playersHtml = '';
-            for (let p of players) {
-                let holeHtml = '';
-                if (gameType === 'texas') {
-                    if (p.hole && p.hole.length === 2) {
-                        holeHtml += renderCard(p.hole[0]);
-                        holeHtml += renderCard(p.hole[1]);
-                    } else {
-                        holeHtml += '<div class="empty-card">?</div><div class="empty-card">?</div>';
-                    }
-                } else {
-                    if (p.hole && p.hole.length === 5) {
-                        p.hole.forEach(c => { 
-                            holeHtml += renderCard(c); 
-                        });
-                    } else {
-                        for (let i = 0; i < 5; i++) {
-                            holeHtml += '<div class="empty-card">?</div>';
-                        }
-                    }
-                }
-
-                playersHtml += `
-                    <div class="player-spot">
-                        <div class="player-name">${p.name}</div>
-                        <div class="hole-cards">${holeHtml}</div>
-                        <div class="player-status">💰 ${Math.floor(pot/players.length)} фишек</div>
-                    </div>
-                `;
-            }
-            playersGrid.innerHTML = playersHtml;
-
-            // победитель
-            const winnerList = determineWinner();
-            if (winnerList && winnerList.length > 0) {
-                let names = winnerList.map(w => w.name).join(' и ');
-                if (winnerList.length === 1) {
-                    winnerMessageDiv.innerText = `🏆 Победитель: ${names} 🏆`;
-                } else {
-                    winnerMessageDiv.innerText = `🤝 Ничья: ${names} разделяют банк`;
-                }
-            } else {
-                winnerMessageDiv.innerText = '✨ Раздайте карты ✨';
-            }
+        } else {
+            winnerMessageDiv.innerText = '✨ Ожидание игры... ✨';
         }
+    }
 
-        // ---------- обработчики изменений ----------
-        function updateSettingsAndDeal() {
-            playerCount = parseInt(playerCountSelect.value, 10);
-            gameType = gameTypeSelect.value;
-            dealNewGame();
+    // ---------- Действия игрока ----------
+    function playerAction(action, bet = 0) {
+        const message = {
+            type: 'playerAction',
+            playerId: 0, // упрощенно
+            action: action,
+            bet: bet
+        };
+        
+        if (amIHost) {
+            applyPlayerAction(0, action, bet);
+        } else {
+            // Отправляем хосту
+            connections.forEach(conn => conn.send(message));
         }
+    }
 
-        // инициализация + слушатели
-        playerCountSelect.addEventListener('change', updateSettingsAndDeal);
-        gameTypeSelect.addEventListener('change', updateSettingsAndDeal);
-        dealBtn.addEventListener('click', updateSettingsAndDeal);
+    function applyPlayerAction(playerId, action, bet) {
+        // Упрощенная логика действий
+        if (action === 'fold') {
+            gameState.players[playerId].isFolded = true;
+        } else if (action === 'call') {
+            gameState.pot += 100;
+        } else if (action === 'raise') {
+            gameState.pot += 200;
+        }
+        
+        broadcastGameState();
+        updateUI();
+    }
 
-        // старт
-        updateSettingsAndDeal();
-    })();
+    // ---------- События интерфейса ----------
+    copyIdBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(myId);
+        alert('ID скопирован!');
+    });
+
+    connectBtn.addEventListener('click', () => {
+        const remoteId = peerIdInput.value.trim();
+        if (!remoteId) return;
+        
+        const conn = peer.connect(remoteId);
+        conn.on('open', () => {
+            connections.push(conn);
+            setupConnection(conn);
+            amIHost = false;  // мы не хост после подключения
+            hostId = remoteId;
+            updateOnlinePlayers();
+        });
+    });
+
+    startGameBtn.addEventListener('click', () => {
+        if (!amIHost) return;
+        startNewGame();
+    });
+
+    foldBtn.addEventListener('click', () => playerAction('fold'));
+    checkCallBtn.addEventListener('click', () => playerAction('call'));
+    raiseBtn.addEventListener('click', () => playerAction('raise'));
+
+    // Показываем кнопки действий когда есть игра
+    function showActionButtons(show) {
+        actionButtons.style.display = show ? 'flex' : 'none';
+    }
+
+    // Инициализация
+    initPeer();
+    showActionButtons(true);
+})();
 </script>
 </body>
 </html>
